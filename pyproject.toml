@@ -1,9 +1,12 @@
 [build-system]
-requires = ["setuptools>=61.0","setuptools-git-versioning"]
+requires = ["setuptools>=61.0","git-versioner>=6.0"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools-git-versioning]
-enabled = true
+[tool.git-versioner]
+snapshot = true
+short = true
+desc = true
+use_git_versioner="short,desc,snapshot"
 
 [project]
 dynamic = ["version"]
