@@ -1,6 +1,5 @@
-from pygui.app import GUIApp,logging
+from pygui.app import GUIApp
 
-logging.basicConfig( level=logging.DEBUG )
 app = GUIApp('./tests/gui.yaml')
 home = app.window('Home')
 
