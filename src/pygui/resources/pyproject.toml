@@ -11,19 +11,16 @@ use_git_versioner="short,desc,snapshot"
 [tools.setuptools]
 include-package-data = true
 
-[tools.setuptools.packages.find]
-where = ["src/pygui/resources"]
-
 [tool.setuptools.package-data]
-pygui = ["*.scada", "*.yaml", "*.ui", "LICENCE","README.md", "*.toml"]
+${package} = ["*.scada", "*.yaml", "*.ui", "*.qrc" ]
 
 [project]
 dynamic = ["version"]
-name = "pygui"
+name = "${package}"
 authors = [
-  { name="Linnik V.V.", email="vlinnik@mail.ru" },
+  { name="${user}", email="${mail}" },
 ]
-description = "Framework for developing GUI for PYPLC programs"
+description = "GUI for PYPLC program"
 readme = "README.md"
 license = { file="LICENSE" }
 requires-python = ">=3.7"
@@ -34,5 +31,5 @@ classifiers = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/vlinnik/pygui"
-"Bug Tracker" = "https://github.com/vlinnik/pygui/issues"
+"Homepage" = "https://github.com/${homepage}"
+"Bug Tracker" = "https://github.com/${homepage}/issues"

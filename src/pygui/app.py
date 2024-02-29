@@ -5,13 +5,9 @@ from pyplc.utils.subscriber import Subscriber
 from pyplc.utils.bindable import Property,Expressions
 from pygui.utils import QObjectPropertyBinding,QObjectSignalHandler
 
-import logging
-import sys
-import yaml
-import re
-import os
+import logging,sys,yaml,re,os,importlib.resources as resources
 from sqlalchemy import ForeignKey,String,BLOB,Boolean,create_engine,select
-from sqlalchemy.orm import Session,DeclarativeBase,Mapped,mapped_column,relationship
+from sqlalchemy.orm import Session,DeclarativeBase,Mapped,mapped_column
 
 class _Base(DeclarativeBase):
     pass
@@ -57,7 +53,7 @@ class GUIApp(QApplication):
                 args[arg[0]] = arg[1]
             exec( self.code, args, self.app.expressions)
 
-    def __init__(self,file: str) -> None:
+    def __init__(self) -> None:
         GUIApp.log.info('Initialization...')
         super().__init__( sys.argv )
         self.toc = { }
@@ -66,11 +62,11 @@ class GUIApp(QApplication):
         self.expressions = Expressions( )
 
         try: 
-            with open(file) as conf:
+            with open(resources.files('resources').joinpath('project.yaml')) as conf:
                 self.ini = yaml.load(conf,Loader=yaml.Loader)
         except Exception as e:
             self.ini = { 'PYPLC': { } , 'Database' : '' }
-            GUIApp.log.error('Problem with %s:%s',file,e)
+            GUIApp.log.error('Problem with project.yaml: %s',e)
 
         if 'Workdir' in self.ini:
             try:
@@ -82,6 +78,7 @@ class GUIApp(QApplication):
         if 'PYSIDE_DESIGNER_PLUGINS' not in os.environ: os.environ['PYSIDE_DESIGNER_PLUGINS'] = os.getcwd()
 
         try:
+            self.engine = create_engine('sqlite:///'+self.ini['Database'], echo=False)
             self.__pyplc( )
             self.__variables( )
         except Exception as e:
@@ -100,7 +97,10 @@ class GUIApp(QApplication):
         for name in devs:
             info = devs[name]
             dev = Subscriber(info['host'],info['port'])
-            self.devices['PYPLC.'+name] = dev
+            timer = QTimer(self)
+            timer.setInterval(info['rate'] if 'rate' in info else 200)
+            timer.timeout.connect( dev )
+            self.devices['PYPLC.'+name] = (dev,timer)
 
     def var(self,init_val=None,name: str=None):
         if isinstance(init_val, Property ):
@@ -122,15 +122,14 @@ class GUIApp(QApplication):
                 ctx[key] = self.expressions.items[key]
                                 
     def __variables(self):
-        engine = create_engine(self.ini['Database'], echo=False)
-        session = Session(engine)
+        session = Session(self.engine)
         vars = select(_Variables).order_by(_Variables.type)
         remote = 0 
         locals= 0
         for var in session.scalars(vars):
             source = self.__expand(var.source)
             if source in self.devices:
-                dev = self.devices[source]
+                dev,_ = self.devices[source]
                 self.var(Subscriber.subscribe(dev,var.address,var.name),var.name)
                 remote+=1
             else:
@@ -149,8 +148,7 @@ class GUIApp(QApplication):
         return child
 
     def animate( self,o: QObject ):
-        engine = create_engine(self.ini['Database'], echo=False)
-        session = Session(engine)
+        session = Session(self.engine)
         animations = select(_Animations).where(_Animations.objectID.like(o.objectName()+'.%'))
         bindings = []
         for row in session.scalars(animations):
@@ -163,8 +161,7 @@ class GUIApp(QApplication):
         return bindings
     
     def scriptize(self,o: QObject):
-        engine = create_engine(self.ini['Database'], echo=False)
-        session = Session(engine)
+        session = Session(self.engine)
         signals = select(_Signals).where(_Signals.objectID.like(o.objectName()+'.%'))
         scripts = []
         for row in session.scalars(signals):
@@ -196,7 +193,10 @@ class GUIApp(QApplication):
         scripts = None
     
     def window(self,ui: str,show: bool = True)->QWidget:
-        file = QFile(ui+".ui")
+        if ui in self.ini['Windows']:
+            file = QFile(os.getcwd() + '/' + self.ini['Windows'][ui])
+        else:
+            file = QFile(os.getcwd() + f'/resources/ui/{ui}.ui')
         if not file.exists():
             self.log.error('Requested window %s not found',ui)
             return None
@@ -216,10 +216,7 @@ class GUIApp(QApplication):
     def exec(self):
         GUIApp.log.info('Starting event loop...')
         for i in self.devices:
-            dev = self.devices[i]
+            dev,timer = self.devices[i]
             dev.connect( )
-            timer = QTimer( self )
-            timer.setInterval( 200 )
-            timer.timeout.connect( dev )
             timer.start( )
         return super().exec()

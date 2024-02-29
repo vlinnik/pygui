@@ -1,7 +1,7 @@
 from pygui.app import GUIApp
 
-app = GUIApp('./tests/gui.yaml')
-home = app.window('Home')
+app = GUIApp()
+home = app.window('Example')
 
 app.expose( globals() )
 
