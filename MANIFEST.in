@@ -2,3 +2,5 @@ include src/pygui/resources/LICENCE
 include src/pygui/resources/README.md
 include src/pygui/resources/default.scada
 include src/pygui/resources/pyproject.toml
+include src/pygui/resources/default/*.yaml
+include src/pygui/resources/default/*.ui

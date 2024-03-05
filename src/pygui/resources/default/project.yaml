@@ -1,0 +1,15 @@
+Database: default.scada
+
+# Environment:
+#   PLC: PYPLC.PLC
+
+#Workdir:  ./
+
+# PYPLC:
+#   PLC:
+#       host: 192.168.2.10
+#       port: 9004
+#       rate: 150
+
+Windows:
+  Example: ui/example.ui

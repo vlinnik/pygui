@@ -5,7 +5,7 @@ from pyplc.utils.subscriber import Subscriber
 from pyplc.utils.bindable import Property,Expressions
 from pygui.utils import QObjectPropertyBinding,QObjectSignalHandler
 
-import logging,sys,yaml,re,os,importlib.resources as resources
+import logging,sys,yaml,re,os,importlib.resources as resources,pathlib
 from sqlalchemy import ForeignKey,String,BLOB,Boolean,create_engine,select
 from sqlalchemy.orm import Session,DeclarativeBase,Mapped,mapped_column
 
@@ -53,17 +53,43 @@ class GUIApp(QApplication):
                 args[arg[0]] = arg[1]
             exec( self.code, args, self.app.expressions)
 
-    def __init__(self) -> None:
+    def __file__(self,file: str):
+        """Найти файл и вернуть его полный путь
+
+        Args:
+            file (str): относительный путь файла
+        """
+        if pathlib.Path(file).exists():  #просто обычный файл
+            return str(pathlib.Path(file).absolute( ))
+        try:
+            if resources.files('resources').joinpath(file).is_file():
+                return str(resources.files('resources').joinpath(file))
+        except:
+            pass
+
+        try:
+            if self.package and resources.files(f'{self.package}.resources').joinpath(file).is_file():
+                return str(resources.files(f'{self.package}.resources').joinpath(file))
+        except:
+            pass
+        
+        return None
+
+    def __init__(self,file:str = None,package: str = None) -> None:
         GUIApp.log.info('Initialization...')
         super().__init__( sys.argv )
+        self.package = package
         self.toc = { }
         self.ini = { } 
         self.devices = { }
         self.expressions = Expressions( )
 
         try: 
-            with open(resources.files('resources').joinpath('project.yaml')) as conf:
+            if file is None: file = self.__file__('project.yaml')
+            file = self.__file__(file)
+            with open( file ) as conf:
                 self.ini = yaml.load(conf,Loader=yaml.Loader)
+            self.log.info(f'Using project configuration {file}')
         except Exception as e:
             self.ini = { 'PYPLC': { } , 'Database' : '' }
             GUIApp.log.error('Problem with project.yaml: %s',e)
@@ -78,7 +104,10 @@ class GUIApp(QApplication):
         if 'PYSIDE_DESIGNER_PLUGINS' not in os.environ: os.environ['PYSIDE_DESIGNER_PLUGINS'] = os.getcwd()
 
         try:
-            self.engine = create_engine('sqlite:///'+self.ini['Database'], echo=False)
+            dbpath = self.__file__(self.ini['Database'])
+            dbconn = f'sqlite:///{dbpath}'
+            self.log.info(f'Opening database {dbconn}')
+            self.engine = create_engine(dbconn, echo=False)
             self.__pyplc( )
             self.__variables( )
         except Exception as e:
@@ -93,6 +122,7 @@ class GUIApp(QApplication):
         return expression
     
     def __pyplc(self):
+        if 'PYPLC' not in self.ini: return
         devs = self.ini['PYPLC']
         for name in devs:
             info = devs[name]
@@ -135,8 +165,10 @@ class GUIApp(QApplication):
             else:
                 if var.type==2:
                     self.var(0.0,var.name)
+                elif var.type==1:
+                    self.var(False,var.name)
                 else:
-                    raise ValueError
+                    raise ValueError(f'Variable type {var.type} not supported')
                 locals+=1
 
         GUIApp.log.info('Variables statistics: remote/locals %d/%d',remote,locals)
@@ -193,10 +225,12 @@ class GUIApp(QApplication):
         scripts = None
     
     def window(self,ui: str,show: bool = True)->QWidget:
-        if ui in self.ini['Windows']:
-            file = QFile(os.getcwd() + '/' + self.ini['Windows'][ui])
+        if 'Windows' in self.ini and ui in self.ini['Windows']:
+            file_name = self.__file__( self.ini['Windows'][ui] )
+            file = QFile( file_name )
         else:
-            file = QFile(os.getcwd() + f'/resources/ui/{ui}.ui')
+            file_name = self.__file__( f'ui/{ui}.ui'.lower() )
+            file = QFile(file_name)
         if not file.exists():
             self.log.error('Requested window %s not found',ui)
             return None

@@ -8,8 +8,9 @@ parser = argparse.ArgumentParser(
                     description='Генерирует скелет проекта по шаблонам',
                     epilog='Пример: python -m pygui --template default')
 
+parser.add_argument('destination',action='store',default='./',help='Путь где создать проект')
 parser.add_argument('-t','--template',choices=['default'],default='default',help='Какой шаблон приложения использовать')
-parser.add_argument('-d','--destination',action='store',default='./',help='Путь где создать проект')
+#parser.add_argument('-d','--destination',action='store',default='./',help='Путь где создать проект')
 parser.add_argument('-p','--package',action='store',required=True,help='Имя проекта')
 parser.add_argument('-u','--user',action='store',default='<your_name>')
 parser.add_argument('-m','--mail',action='store',default='<your@mail>')

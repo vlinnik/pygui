@@ -12,7 +12,7 @@ use_git_versioner="short,desc,snapshot"
 include-package-data = true
 
 [tool.setuptools.package-data]
-${package} = ["*.scada", "*.yaml", "*.ui", "*.qrc" ]
+${package} = ["**/*.scada", "**/*.yaml", "**/*.ui", "**/*.qrc" ]
 
 [project]
 dynamic = ["version"]

@@ -8,14 +8,14 @@ short = true
 desc = true
 use_git_versioner="short,desc,snapshot"
 
-[tools.setuptools]
+[tool.setuptools]
 include-package-data = true
 
-[tools.setuptools.packages.find]
-where = ["src/pygui/resources"]
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [tool.setuptools.package-data]
-pygui = ["*.scada", "*.yaml", "*.ui", "LICENCE","README.md", "*.toml"]
+pygui = ["**/*.scada", "**/*.yaml", "**/*.ui", "**/LICENCE","**/README.md", "**/*.toml"]
 
 [project]
 dynamic = ["version"]
