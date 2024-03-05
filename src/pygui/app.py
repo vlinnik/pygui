@@ -61,24 +61,25 @@ class GUIApp(QApplication):
         """
         if pathlib.Path(file).exists():  #просто обычный файл
             return str(pathlib.Path(file).absolute( ))
-        try:
-            if resources.files('resources').joinpath(file).is_file():
-                return str(resources.files('resources').joinpath(file))
-        except:
-            pass
+        for hint in self.hints:
+            if pathlib.Path(hint).is_dir() and pathlib.Path(hint).joinpath(file).exists():
+                return str(pathlib.Path(hint).joinpath(file).absolute())
+            if pathlib.Path(hint).is_file() and pathlib.Path(hint).parent.resolve().joinpath(file).exists():
+                return str(pathlib.Path(hint).parent.resolve().joinpath(file).absolute())
 
         try:
-            if self.package and resources.files(f'{self.package}.resources').joinpath(file).is_file():
-                return str(resources.files(f'{self.package}.resources').joinpath(file))
+            if self.package and resources.files(f'{self.package}').joinpath(file).is_file():
+                return str(resources.files(f'{self.package}').joinpath(file))
         except:
             pass
         
         return None
 
-    def __init__(self,file:str = None,package: str = None) -> None:
+    def __init__(self,file:str = None,package: str = None , hints = [] ) -> None:
         GUIApp.log.info('Initialization...')
         super().__init__( sys.argv )
         self.package = package
+        self.hints = hints
         self.toc = { }
         self.ini = { } 
         self.devices = { }

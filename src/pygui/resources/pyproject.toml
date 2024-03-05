@@ -11,6 +11,9 @@ use_git_versioner="short,desc,snapshot"
 [tools.setuptools]
 include-package-data = true
 
+[tool.setuptools.packages.find]
+include = ["${package}"]
+
 [tool.setuptools.package-data]
 ${package} = ["**/*.scada", "**/*.yaml", "**/*.ui", "**/*.qrc" ]
 
