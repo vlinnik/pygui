@@ -45,7 +45,7 @@ try:
         def includeFile(self):
             return "pygui.animation"
 except:
-    pass
+    import traceback; traceback.print_exc();
 
 try:
     from pygui.runtimetrend import RuntimeTrend
@@ -95,7 +95,7 @@ if __name__=="__main__":
     from AnyQt.QtWidgets import QMainWindow,QApplication
     from AnyQt.QtCore import QUrl
     import sys
-    from animation import Animation,PlaybackHint
+    from pygui.animation import Animation,PlaybackHint
     
     app = QApplication(sys.argv)
     home = QMainWindow( )
