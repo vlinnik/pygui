@@ -3,3 +3,7 @@ __pycache__
 dist
 _version.py
 build
+.pybuild
+.debhelper
+debian/python3-*
+debian/debhelper-build-stamp
