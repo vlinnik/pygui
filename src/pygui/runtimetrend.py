@@ -1,7 +1,7 @@
 from AnyQt.QtCore import Qt,Property
-from AnyQt.QtGui import QColor
+from AnyQt.QtGui import QColor,QBrush
 from AnyQt.QtWidgets import QApplication
-#pip install PythonQwt
+#pip install PythonQwt or apt install python3-qwt
 from typing import List
 from datetime import datetime,timedelta
 from qwt import QwtPlot,QwtPlotGrid,QwtPlotCurve,QwtPlotItem,QwtScaleDraw,QwtText
@@ -95,6 +95,7 @@ class RuntimeTrend(QwtPlot):
     depth = Property(int,depth,setDepth)
     pen_0 = Property(float,pen_0,setPen_0)
     pen_1 = Property(float,pen_1,setPen_1)
+    canvasBackground = Property(QBrush,QwtPlot.canvasBackground,QwtPlot.setCanvasBackground)
         
 if __name__=='__main__':
     app = QApplication( [] )
