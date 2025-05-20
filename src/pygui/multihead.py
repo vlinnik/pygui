@@ -1,15 +1,6 @@
-from AnyQt.QtWidgets import QMainWindow,QWidget,QStackedWidget,QApplication,QActionGroup,QAction,QLabel,QToolBar,QVBoxLayout
-from AnyQt.QtCore import Qt,QPoint
+from AnyQt.QtWidgets import QMainWindow,QWidget,QApplication,QActionGroup,QAction,QToolBar,QVBoxLayout
+from AnyQt.QtCore import Qt
 from AnyQt.QtGui import QIcon,QScreen
-from collections import namedtuple
-import sys
-
-app =QApplication(sys.argv)
-
-PAGEINFO = namedtuple('PAGEINFO',('screen','page','title','icon'))
-
-_screens:list[QMainWindow] = [] # list of QMainWindow instances
-_pages:list[PAGEINFO] = [ ] # list of QWidget instances
 
 class PageInfo():
     def __init__(self,page: QWidget, title:str=None, icon: QIcon=None,):
@@ -80,12 +71,18 @@ class Manager():
         self.screens:list[Container] = []
         self.pages:list[PageInfo] = []
         app:QApplication = QApplication.instance()
+        self.primaryScreen:QMainWindow = None
         
-        for s in app.screens():
-            self.screenAdded( s )
+        if app is not None:
+            for s in app.screens():
+                self.screenAdded( s )
+                
+            app.screenAdded.connect(self.screenAdded)
+            app.screenRemoved.connect(self.screenRemoved)
+            self.primaryScreen = self.screens[0]
+        else:
+            print('Warning: QApplication instance not found. Multihead manager will not work.')
             
-        app.screenAdded.connect(self.screenAdded)
-        app.screenRemoved.connect(self.screenRemoved)
             
     def screenAdded(self,screen: QScreen):
         container = Container( self )
@@ -128,7 +125,7 @@ class Manager():
                 active = True
 
 manager = Manager( )
-instance = manager.screens[0]
+instance = manager.primaryScreen
 
 def append(w: QWidget,title: str=None,icon: QIcon=None):
     manager.append(w,title,icon)
@@ -138,5 +135,3 @@ def tools( w: QWidget):
     _tb.addWidget( w )
     _tb.setFloatable(False)
     _tb.setMovable(False)
-
-app.exec() 
