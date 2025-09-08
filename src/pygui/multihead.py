@@ -22,6 +22,7 @@ class Container(QMainWindow):
         self.centralWidget().setObjectName("centralwidget")
         self.setProperty("style","container")
         self.centralWidget().setLayout(QVBoxLayout())
+        self.centralWidget().layout().setContentsMargins(0,0,0,0)
         
         _navgroup = QActionGroup(self)
         _navgroup.setObjectName('navgroup')
@@ -53,6 +54,7 @@ class Container(QMainWindow):
     def deactivate(self,widget: QWidget,index:int = None):
         if self._page is not None and widget==self._page:
             self._page.hide()
+            self._page.setParent(None)
             self.centralWidget().layout().removeWidget(self._page)
             self._page = None
         if index is not None:
@@ -83,17 +85,30 @@ class Manager():
         else:
             print('Warning: QApplication instance not found. Multihead manager will not work.')
             
-            
     def screenAdded(self,screen: QScreen):
         container = Container( self )
         self.screens.append( container )
-        container.setWindowTitle( screen.name() )
-        container.setGeometry(screen.geometry())
+        container.setWindowTitle( f'[{screen.name()}]' )
         container.show()
-        if len(self.screens)==1: container.closeEvent = lambda _: app.quit()
+        container.setGeometry(screen.geometry())
+        if len(self.screens)==1: container.closeEvent = lambda _: QApplication.instance().quit()
+        
+        used = False
+        for p in self.pages:
+            container.append(p.title,p.icon)
+            if p.screen is None and not used:
+                container.activate(p.page,self.pages.index(p))
+                p.screen = container
+                used = True
     
     def screenRemoved(self,screen: QScreen):
-        pass
+        for p in self.pages:
+            if p.screen is not None and p.screen.screen() == screen:
+                container = p.screen
+                self.deactivate(self.pages.index(p),container)
+                p.screen = None
+                container.deleteLater()
+                
     
     def activate(self,index: int,container: Container ):
         old_screen = self.pages[index].screen
