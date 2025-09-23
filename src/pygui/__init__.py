@@ -1,4 +1,4 @@
 try:
     from ._version import __version__
-except:
+except ImportError:
     __version__ = '0.0.0+unknown'
