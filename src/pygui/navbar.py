@@ -1,5 +1,5 @@
-from AnyQt.QtWidgets import QMainWindow,QWidget,QStackedWidget,QApplication
-from AnyQt.QtCore import Qt,QSettings
+from qtpy.QtWidgets import QMainWindow,QWidget,QStackedWidget,QApplication
+from qtpy.QtCore import Qt,QSettings
 
 instance = QMainWindow( )
 instance.setCentralWidget(QStackedWidget())

@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
-from AnyQt.QtGui import QIcon
-from AnyQt.QtDesigner import QPyDesignerCustomWidgetPlugin
+from qtpy.QtGui import QIcon
+from qtpy.QtDesigner import QPyDesignerCustomWidgetPlugin
 
 try:
     from pygui.animation import Animation,PlaybackHint
@@ -92,8 +92,8 @@ except:
     pass
     
 if __name__=="__main__":
-    from AnyQt.QtWidgets import QMainWindow,QApplication
-    from AnyQt.QtCore import QUrl
+    from qtpy.QtWidgets import QMainWindow,QApplication
+    from qtpy.QtCore import QUrl
     import sys
     from pygui.animation import Animation,PlaybackHint
     

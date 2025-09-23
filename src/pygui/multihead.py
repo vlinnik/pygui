@@ -1,6 +1,6 @@
-from AnyQt.QtWidgets import QMainWindow,QWidget,QApplication,QActionGroup,QAction,QToolBar,QVBoxLayout
-from AnyQt.QtCore import Qt
-from AnyQt.QtGui import QIcon,QScreen
+from qtpy.QtWidgets import QMainWindow,QWidget,QApplication,QActionGroup,QAction,QToolBar,QVBoxLayout
+from qtpy.QtCore import Qt
+from qtpy.QtGui import QIcon,QScreen
 
 class PageInfo():
     def __init__(self,page: QWidget, title:str=None, icon: QIcon=None,):

@@ -1,13 +1,14 @@
-from AnyQt.QtWidgets import QLabel,QWidget
-try:
-    from AnyQt.QtCore import Q_FLAGS as pyqtEnum
-except:
-    from AnyQt.QtCore import  pyqtEnum
-from AnyQt.QtCore import QUrl,QTimer,Property,Signal,Slot
-from AnyQt.QtGui import QMovie,QPixmap
+from qtpy.QtWidgets import QLabel,QWidget
+import qtpy
+if qtpy.API == "pyqt6":
+    from PyQt6.QtCore import pyqtEnum
+if qtpy.API == "pyqt5":
+    from PyQt5.QtCore import Q_ENUM as pyqtEnum
+from qtpy.QtCore import QUrl,QTimer,Property,Signal,Slot
+from qtpy.QtGui import QMovie,QPixmap
 from enum import Flag,auto
-from AnyQt.QtWidgets import QMainWindow
-from AnyQt.QtWidgets import QApplication
+from qtpy.QtWidgets import QMainWindow
+from qtpy.QtWidgets import QApplication
 import sys
 
 class PlaybackHint(Flag):
@@ -149,11 +150,10 @@ class Animation(QLabel):
     playbackHints = Property(PlaybackHint,getPlaybackHints,setPlaybackHints)
 
 if __name__=="__main__":
-    import SCADA_qrc
     app = QApplication(sys.argv)
     home = QMainWindow( )
     ani = Animation( home )
-    ani.setSource( QUrl("qrc:/SCADA/dcement.mng"))
+    ani.setSource( QUrl("file:///tmp/test.mng"))
     ani.setPlaybackHints( PlaybackHint.Reversed)
     home.resize(ani.size())
 

@@ -1,6 +1,6 @@
-from AnyQt.QtCore import Qt,Property
-from AnyQt.QtGui import QColor,QBrush
-from AnyQt.QtWidgets import QApplication
+from qtpy.QtCore import Qt,Property
+from qtpy.QtGui import QColor,QBrush
+from qtpy.QtWidgets import QApplication
 #pip install PythonQwt or apt install python3-qwt
 from typing import List
 from datetime import datetime,timedelta
